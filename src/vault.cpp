@@ -77,9 +77,70 @@ namespace vault{
         return false;
     }
 
+    bool authenticateUser(const std::string& masterPass) {
+        std::ifstream file(getVaultPath());
+        std::string savedHash;
+        std::getline(file, savedHash);
+        file.close();
+
+        if (sha256(masterPass) == savedHash) {
+            return true;
+        } else {
+            std::cout << "[!] Wrong password.\n";
+            return false;
+        }
+    }
+
 
     void handleInit() {
-        std::cout << "Initializing password vault..." << std::endl;
+        std::cout << "[+] Initializing vault...\n";
+        std::string vaultPath = getVaultPath();
+
+
+        std::cout << "== CLI PASSWORD VAULT ==\n";
+        if (vaultExists(vaultPath)) {
+            std::cout << "[+] Vault found at: " << vaultPath << "\n";
+            return;
+        } else {
+            std::cout << "[!] Vault file not found. Creating new vault...\n";
+            createVaultFile(vaultPath);
+        }
+
+        std::ifstream infile(vaultPath);
+        std::string existingHash;
+        std::getline(infile, existingHash);
+        infile.close();
+
+        if (!existingHash.empty()) {
+            std::cout << "[!] Vault is already initialized.\n";
+            return;
+        }
+
+        std::string masterPass, confirmPass;
+        // std::cout << "Enter a master password: ";
+        masterPass = getMaskedInput("Enter a master password: ");
+        // std::cout << "Confirm master password: ";
+        confirmPass = getMaskedInput("Confirm master password: ");
+        if (masterPass.length() < 3) {
+            std::cerr << "[!] Password must be at least 4 characters long.\n";
+            return;
+        }
+
+        if (masterPass != confirmPass) {
+            std::cerr << "[!] Passwords do not match.\n";
+            return;
+        }
+
+        std::string hashed = sha256(masterPass);
+
+        std::ofstream outfile(vaultPath);
+        if (outfile.is_open()) {
+            outfile << hashed << "\n";  // Store hashed password
+            outfile.close();
+            std::cout << "[+] Master password set and vault initialized!\n";
+        } else {
+            std::cerr << "[!] Could not write to vault.\n";
+        }
         
     }
 
