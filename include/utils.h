@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <cctype>
+#include <locale>
+#include <sstream>
 
 #ifdef _WIN32
 #include <conio.h>

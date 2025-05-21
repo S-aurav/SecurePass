@@ -19,6 +19,11 @@ set(SOURCES
 
 add_executable(kpx ${SOURCES})
 
+if(WIN32)
+    enable_language(RC)
+    target_sources(kpx PRIVATE ${PROJECT_SOURCE_DIR}/src/resource.rc)
+endif()
+
 # Link against the clip library
 target_link_libraries(kpx PRIVATE clip)
 target_include_directories(kpx PRIVATE external/clip)
