@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <clip.h> // For clipboard operations
 
 #include "../include/vault.h"
 #include "../include/sha256.h"
@@ -187,12 +188,88 @@ namespace vault{
     }
 
     void handleList() {
-        std::cout << "Listing all entries..." << std::endl;
+        std::ifstream vault(getVaultPath());
+        std::string line;
+        bool any = false;
+
+        // Skip the first line (password hash)
+        std::getline(vault, line);
+
+        std::cout << "== Saved Sites ==\n";
+        while (std::getline(vault, line)) {
+            std::istringstream iss(line);
+            std::string site;
+            if (std::getline(iss, site, '|')) {
+                std::cout << "- " << site << "\n";
+                any = true;
+            }
+        }
+
+        if (!any) std::cout << "[*] No entries found.\n";
         
     }
 
-    void handleGet(const std::string& site) {
-        std::cout << "Retrieving password for site: " << site << std::endl;
+    void handleGet(const std::string& targetSite) {
+        if (!authenticateUser()) return;
+
+        std::string confirmMasterPass;
+        confirmMasterPass = getMaskedInput("Re-enter master password (for decryption): ");
+
+        if (confirmMasterPass.length() < 3) {
+            std::cerr << "[!] Password must be at least 4 characters long.\n";
+            return;
+        }
+
+        if (!authenticateUser(confirmMasterPass)) {
+            std::cerr << "[!] Authentication failed.\n";
+            return;
+        }
+        
+
+        std::ifstream vault(getVaultPath());
+        std::string line;
+        bool found = false;
+
+        // Skip password hash line
+        std::getline(vault, line);
+
+        while (std::getline(vault, line)) {
+            std::istringstream iss(line);
+            std::string site, encryptedUsername, encryptedPassword;
+
+            std::getline(iss, site, '|');
+            std::getline(iss, encryptedUsername, '|');
+            std::getline(iss, encryptedPassword);
+
+            if (site.empty() || encryptedUsername.empty() || encryptedPassword.empty()) {
+                std::cerr << "[!] Corrupted entry in vault.\n";
+                return;
+            }
+
+            if (site == targetSite) {
+                std::string keyHash = sha256(confirmMasterPass + site);
+                std::string username = xorDecrypt(encryptedUsername, keyHash);
+                std::string password = xorDecrypt(encryptedPassword, keyHash);
+
+                std::cout << "== " << site << " ==\n";
+                std::cout << "Username: " << username << "\n";
+                std::cout << "Password: " << password << "\n";
+
+
+                if(clip::set_text(password)) {
+                    std::cout << "[+] Password copied to clipboard.\n";
+                } else {
+                    std::cerr << "[!] Failed to copy password to clipboard.\n";
+                }
+                
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            std::cout << "[!] No entry found for site: " << targetSite << "\n";
+        }
         
     }
 
