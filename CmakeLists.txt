@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.10)
+project(PasswordVault)
+
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 99)
+
+# Include header files
+include_directories(include)
+
+# Source files
+set(SOURCES
+    src/main.cpp
+    src/vault.cpp
+)
+
+add_executable(vault ${SOURCES})
+set_target_properties(vault PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build
+)
