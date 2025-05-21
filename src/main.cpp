@@ -4,11 +4,11 @@
 
 void print_usage() {
     std::cout << "Usage:\n"
-              << "  vault init                     Initialize the password vault\n"
-              << "  vault add <site> <username>    Add a new entry\n"
-              << "  vault list                     List all entries\n"
-              << "  vault get <site>               Retrieve password for site\n"
-              << "  vault genpass                  Generate a strong password\n"
+              << "  kpx init                     Initialize the password vault\n"
+              << "  kpx add <site> <username>    Add a new entry\n"
+              << "  kpx list                     List all entries\n"
+              << "  kpx get <site>               Retrieve password for site\n"
+              << "  kpx genpass                  Generate a strong password\n"
               << std::endl;
 }
 

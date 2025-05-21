@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(PasswordVault)
+project(SecurePasswordVault)
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,7 +14,7 @@ set(SOURCES
     src/vault.cpp
 )
 
-add_executable(vault ${SOURCES})
-set_target_properties(vault PROPERTIES
+add_executable(kpx ${SOURCES})
+set_target_properties(kpx PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build
 )

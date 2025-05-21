@@ -8,6 +8,8 @@
 #include <iomanip>
 
 #include "../include/vault.h"
+#include "../include/sha256.h"
+#include "../include/utils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -17,7 +19,7 @@
 #include <random>
 
 
-const std::string VAULT_FILE = "vault_data.enc.jpg";
+const std::string VAULT_FILE = "kpx_data.enc.jpg";
 
 
 namespace vault{
@@ -40,6 +42,39 @@ namespace vault{
             std::cerr << "[!] Failed to create vault file.\n";
             exit(1);
         }
+    }
+
+    bool authenticateUser() {
+        std::ifstream file(getVaultPath());
+        std::string savedHash;
+        std::getline(file, savedHash);
+        file.close();
+
+        for (int attempts = 0; attempts < 3; ++attempts) {
+            std::string inputPass;
+
+            while(true) {
+                inputPass = getMaskedInput("Enter master password: ");
+
+                if(inputPass.empty()) {
+                    std::cout << "[!] Password cannot be empty.\n";
+                } else if (inputPass.length() < 3) {
+                    std::cout << "[!] Password must be at least 4 characters long.\n";
+                } else {
+                    break;
+                }
+            }
+
+            
+            if (sha256(inputPass) == savedHash) {
+                return true;
+            } else {
+                std::cout << "[!] Wrong password (" << 2 - attempts << " tries left).\n";
+            }
+        }
+
+        std::cout << "[!] Maximum attempts reached. Exiting.\n";
+        return false;
     }
 
 
