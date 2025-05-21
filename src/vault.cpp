@@ -347,7 +347,94 @@ namespace vault{
     }
 
     void handleGenerate() {
-        std::cout << "Generating a strong password..." << std::endl;
+        int choice, length;
+        std::string charset;
+
+        std::cout << "[+] Password Generator\n";
+        std::cout << "Choose type of password:\n";
+        std::cout << "1. Numbers only\n";
+        std::cout << "2. Alphanumeric\n";
+        std::cout << "3. Alphanumeric + Special characters\n";
+        std::cout << "Enter your choice (1-3): ";
+        std::cin >> choice;
+
+        std::cout << "Enter desired password length: ";
+        std::cin >> length;
+
+        if (length <= 0) {
+            std::cout << "[!] Invalid length.\n";
+            return;
+        }
+
+        switch (choice) {
+            case 1:
+                charset = "0123456789";
+                break;
+            case 2:
+                charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                break;
+            case 3:
+                charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_=+[]{}|;:',.<>?/";
+                break;
+            default:
+                std::cout << "[!] Invalid choice.\n";
+                return;
+        }
+
+        std::string password;
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::uniform_int_distribution<> dist(0, charset.size() - 1);
+
+        for (int i = 0; i < length; ++i) {
+            password += charset[dist(generator)];
+        }
+
+        std::cout << "[+] Generated password: " << password << "\n";
+
+        char saveChoice;
+        std::cout << "Do you want to save this password in the vault? (y/n): ";
+        std::cin >> saveChoice;
+
+        if (saveChoice == 'y' || saveChoice == 'Y') {
+            if (!authenticateUser()) return;
+
+            std::string site, username, confirmMasterPass;
+            std::cout << "Enter site name: ";
+            std::cin >> site;
+            std::cout << "Enter username: ";
+            std::cin >> username;
+            confirmMasterPass = getMaskedInput("Re-enter master password (for encryption): ");
+            
+            if (confirmMasterPass.length() < 3) {
+                std::cerr << "[!] Password must be at least 4 characters long.\n";
+                return;
+            }
+
+            if (!authenticateUser(confirmMasterPass)) {
+                std::cerr << "[!] Authentication failed.\n";
+                return;
+            }
+
+            std::string keyHash = sha256(confirmMasterPass + site); // Per-entry encryption key
+            std::string encryptedSite = site; // Stored in plaintext
+            std::string encryptedUsername = xorEncrypt(username, keyHash);
+            std::string encryptedPassword = xorEncrypt(password, keyHash);
+
+            std::ofstream vault(getVaultPath(), std::ios::app | std::ios::binary);
+            
+            if (!vault) {
+                std::cerr << "[!] Failed to open vault file.\n";
+                return;
+            }
+
+            vault << encryptedSite << "|" << encryptedUsername << "|" << encryptedPassword << "\n";
+            vault.close();
+
+            std::cout << "[+] Entry saved securely for site: " << site << "\n";
+        }else {
+            std::cout << "[*] Password not saved.\n";
+        }
         
     }
 
