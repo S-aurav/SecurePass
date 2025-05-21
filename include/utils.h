@@ -32,3 +32,15 @@ std::string getMaskedInput(const std::string& prompt) {
     std::cout << std::endl;
     return input;
 }
+
+std::vector<std::string> split(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::stringstream ss(str);
+    std::string token;
+    
+    while (std::getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    
+    return tokens;
+}

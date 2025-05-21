@@ -6,6 +6,8 @@ void print_usage() {
     std::cout << "Usage:\n"
               << "  kpx init                     Initialize the password vault\n"
               << "  kpx add <site> <username>    Add a new entry\n"
+              << "  kpx update <site>            Update an existing entry\n"
+              << "  kpx delete <site>            Delete an entry\n"
               << "  kpx list                     List all entries\n"
               << "  kpx get <site>               Retrieve password for site\n"
               << "  kpx genpass                  Generate a strong password\n"
@@ -72,6 +74,23 @@ int main(int argc, char* argv[]) {
                 }
                 std::string site = argv[2];
                 vault::handleDelete(site);
+            } else {
+                std::cerr << "Unknown command: " << command << "\n";
+                print_usage();
+                return 1;
+            }
+            break;
+
+        case 'u':
+            if (command == "update") {
+                if (argc != 3) {
+                    std::cerr << "Usage: vault update <site>\n";
+                    return 1;
+                }else{
+                    std::string site = argv[2];
+                    vault::handleUpdate(site);
+                }
+                return 1;
             } else {
                 std::cerr << "Unknown command: " << command << "\n";
                 print_usage();

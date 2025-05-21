@@ -273,6 +273,79 @@ namespace vault{
         
     }
 
+    void handleUpdate(const std::string& targetSite) {
+        std::cout << "[*] Updating entry for site: " << targetSite << "\n";
+
+        std::ifstream vaultIn(getVaultPath());
+        if (!vaultIn) {
+            std::cerr << "[!] Could not open vault file.\n";
+            return;
+        }
+
+        std::vector<std::string> lines;
+        std::string line;
+
+        while (std::getline(vaultIn, line)) {
+            lines.push_back(line);
+        }
+        vaultIn.close();
+
+        if (lines.empty()) {
+            std::cerr << "[!] Vault file is empty.\n";
+            return;
+        }
+
+        std::string masterPass;
+        // std::cout << "Enter master password: ";
+        masterPass = getMaskedInput("Enter master password: ");
+
+        std::string keyHash = sha256(masterPass + targetSite);
+
+        bool updated = false;
+        std::vector<std::string> updatedLines;
+        updatedLines.push_back(lines[0]); // Preserve master password hash
+
+        for (size_t i = 1; i < lines.size(); ++i) {
+            auto parts = split(lines[i], '|');
+            if (parts.size() != 3) {
+                updatedLines.push_back(lines[i]);
+                continue;
+            }
+
+            std::string Site = parts[0];
+            if (Site == targetSite) {
+                std::string newUsername, newPassword;
+                std::cout << "Enter new username: ";
+                std::cin >> newUsername;
+                std::cout << "Enter new password: ";
+                std::cin >> newPassword;
+
+                // std::string encSite = xorEncrypt(targetSite, keyHash);
+                std::string encUser = xorEncrypt(newUsername, keyHash);
+                std::string encPass = xorEncrypt(newPassword, keyHash);
+
+                updatedLines.push_back(Site + "|" + encUser + "|" + encPass);
+                updated = true;
+            } else {
+                updatedLines.push_back(lines[i]);
+            }
+        }
+
+        if (!updated) {
+            std::cout << "[!] No entry found for site: " << targetSite << "\n";
+            return;
+        }
+
+        std::ofstream vaultOut(getVaultPath(), std::ios::trunc);
+        for (const auto& l : updatedLines) {
+            vaultOut << l << "\n";
+        }
+        vaultOut.close();
+
+        std::cout << "[+] Entry updated successfully.\n";
+
+    }
+
     void handleGenerate() {
         std::cout << "Generating a strong password..." << std::endl;
         
