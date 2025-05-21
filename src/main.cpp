@@ -7,7 +7,7 @@ void print_usage() {
               << "  kpx init                     Initialize the password vault\n"
               << "  kpx add <site> <username>    Add a new entry\n"
               << "  kpx update <site>            Update an existing entry\n"
-              << "  kpx delete <site>            Delete an entry\n"
+              << "  kpx del <site>               Delete an entry\n"
               << "  kpx list                     List all entries\n"
               << "  kpx get <site>               Retrieve password for site\n"
               << "  kpx genpass                  Generate a strong password\n"
