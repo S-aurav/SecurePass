@@ -33,6 +33,7 @@ It allows you to safely store, retrieve, generate, update, and delete passwords,
 
 - Run ```kpx init``` when installing for first time to set Master Password and vault
 
+---
 
 ## 🚀 Setup Instructions
 
@@ -158,13 +159,3 @@ We welcome contributions! Here’s how to get started:
 - For Linux users, make sure your terminal supports clipboard (`xclip` or `xsel` may be needed).
 
 ---
-
-## 🧠 License
-
-MIT License © 2025 Your Name
-
----
-
-## 💬 Contact
-
-For suggestions, bugs, or improvements, open an issue.
