@@ -438,8 +438,46 @@ namespace vault{
         
     }
 
-    void handleDelete(const std::string& site) {
-        std::cout << "Deleting entry for site: " << site << std::endl;
+    void handleDelete(const std::string& targetSite) {
+        if (!authenticateUser()) return;
+
+        std::ifstream vaultIn(getVaultPath());
+        if(!vaultIn) {
+            std::cerr << "[!] Failed to open vault file.\n";
+            return;
+        }
+
+        std::vector<std::string> updatedEntries;
+        std::string line;
+        bool deleted = false;
+
+        while(std::getline(vaultIn, line)) {
+            std::istringstream iss(line);
+            std::string site, encryptedUsername, encryptedPassword;
+
+            std::getline(iss, site, '|');
+            std::getline(iss, encryptedUsername, '|');
+            std::getline(iss, encryptedPassword, '|');
+
+            if (site == targetSite) {
+                deleted = true;
+                continue; // Skip this entry
+            }
+            updatedEntries.push_back(line);
+        }
+        vaultIn.close();
+
+        std::ofstream vaultOut(getVaultPath(), std::ios::trunc);
+        for (const auto& entry : updatedEntries) {
+            vaultOut << entry << "\n";
+        }
+        vaultOut.close();
+
+        if (deleted) {
+            std::cout << "[+] Entry deleted for site: " << targetSite << "\n";
+        } else {
+            std::cout << "[!] No entry found for site: " << targetSite << "\n";
+        }   
         
     }
 }
