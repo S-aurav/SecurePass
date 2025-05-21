@@ -10,6 +10,7 @@
 #include "../include/vault.h"
 #include "../include/sha256.h"
 #include "../include/utils.h"
+#include "../include/crypto.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -145,7 +146,43 @@ namespace vault{
     }
 
     void handleAdd() {
-        std::cout << "Adding a new entry..." << std::endl;
+        std::cout << "[+] Adding new entry...\n";
+        if (!authenticateUser()) return;
+
+        std::string site, username, password, confirmMasterPass;
+        std::cout << "Enter site name: ";
+        std::cin >> site;
+        std::cout << "Enter username: ";
+        std::getline(std::cin >> std::ws, username); // Read full line for username
+        std::cout << "Enter password: ";
+        std::cin >> password;
+
+        confirmMasterPass = getMaskedInput("Re-enter master password (for encryption): ");
+
+        if (confirmMasterPass.length() < 3) {
+            std::cerr << "[!] Password must be at least 4 characters long.\n";
+            return;
+        }
+
+        if (!authenticateUser(confirmMasterPass)) {
+            std::cerr << "[!] Authentication failed.\n";
+            return;
+        }
+
+        std::string keyHash = sha256(confirmMasterPass + site); // Per-entry encryption key
+        std::string encryptedUsername = xorEncrypt(username, keyHash);
+        std::string encryptedPassword = xorEncrypt(password, keyHash);
+
+        std::ofstream vault(getVaultPath(), std::ios::app | std::ios::binary);
+        if (!vault) {
+            std::cerr << "[!] Failed to open vault file.\n";
+            return;
+        }
+
+        vault << site << "|" << encryptedUsername << "|" << encryptedPassword << "\n";
+        vault.close();
+
+        std::cout << "[+] Entry added securely for site: " << site << "\n";
         
     }
 

@@ -13,6 +13,7 @@ set(SOURCES
     src/main.cpp
     src/vault.cpp
     src/sha256.cpp
+    src/crypto.cpp
 )
 
 add_executable(kpx ${SOURCES})
