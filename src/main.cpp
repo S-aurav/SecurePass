@@ -97,6 +97,16 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             break;
+
+        case 'h':
+            if (command == "help") {
+                print_usage();
+            } else {
+                std::cerr << "Unknown command: " << command << "\n";
+                print_usage();
+                return 1;
+            }
+            break;
         default:
             std::cerr << "Unknown command: " << command << "\n";
             print_usage();
