@@ -126,32 +126,6 @@ After fetching a password using `get <site>`, the password is automatically copi
 
 ---
 
-## 🙌 Contributing
-
-We welcome contributions! Here’s how to get started:
-
-1. **Fork this repository**
-2. **Clone your fork:**
-   ```bash
-   git clone https://github.com/S-aurav/SecurePass.git
-   cd SecurePass
-   ```
-3. **Create a new branch:**
-   ```bash
-   git checkout -b feature-name
-   ```
-4. **Make your changes**
-5. **Commit and push:**
-   ```bash
-   git commit -m "Add: meaningful message"
-   git push origin feature-name
-   ```
-6. **Open a Pull Request**
-
-📄 Please include a clear description of your changes and link any related issues.
-
----
-
 ## 📌 Notes
 
 - All data is stored locally in an encrypted vault file.
